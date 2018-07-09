@@ -8,6 +8,6 @@ import retrofit2.http.GET;
 public interface ImageAPIInterface {
 
     @GET("s/2iodh4vg0eortkl/facts.json")
-    Call<RowContentInfo> getJSON();
+    Call<RowContentInfo> getJSONResponse();
 
 }

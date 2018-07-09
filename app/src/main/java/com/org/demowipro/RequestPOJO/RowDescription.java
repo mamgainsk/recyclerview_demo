@@ -8,6 +8,16 @@ public class RowDescription {
     @SerializedName("title")
     @Expose
     private String title;
+
+    @Override
+    public String toString() {
+        return "RowDescription{" +
+                "title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", imageHref=" + imageHref +
+                '}';
+    }
+
     @SerializedName("description")
     @Expose
     private String description;
