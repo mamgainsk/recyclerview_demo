@@ -1,8 +1,10 @@
 package com.org.demowipro;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.VisibleForTesting;
 import android.support.test.espresso.idling.CountingIdlingResource;
@@ -17,8 +19,11 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import com.org.demowipro.adapter.RecyclerViewAdapter;
+import com.org.demowipro.database_module.AppDatabase;
+import com.org.demowipro.database_module.DatabaseUtils;
 import com.org.demowipro.networking_service.APICallback;
 import com.org.demowipro.networking_service.NetworkingService;
+import com.org.demowipro.preference_manager.PreferenceManagerClass;
 import com.org.demowipro.request_pojo.RowContentInfo;
 import com.org.demowipro.request_pojo.RowDescription;
 
@@ -44,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     private AppCompatTextView msgTextView;
     private RowContentInfo rowContentInfo;
     private int lastItemPosition;
+    private AppDatabase appDatabase;
 
     CountingIdlingResource idlingResource = new CountingIdlingResource("Network Call");
 
@@ -58,7 +64,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        appDatabase = AppDatabase.getAppDatabase(this);
         initializeViews();
 
         swipeRefreshLayout.setOnRefreshListener(refreshRecyclerViewListener);
@@ -81,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
      * Use of retrofit to consume JSON API and send data to Adapter class
      **/
 
-    private void getDataFromAPI(boolean isForceRefresh) {
+    private void getDataFromAPI(final boolean isForceRefresh) {
         idlingResource.increment();
         showHideView(false);
         if (!isForceRefresh)
@@ -92,10 +98,20 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<?> call, Response<?> response, int requestCode) {
                 Log.d(TAG, "Row Response : " + response.body());
                 rowContentInfo = (RowContentInfo) response.body();
+                if (isForceRefresh)
+                    lastItemPosition = 0;
                 loadData();
                 swipeRefreshLayout.setRefreshing(false);
                 progressBar.setVisibility(View.GONE);
                 idlingResource.decrement();
+                AsyncTask.execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        DatabaseUtils.deleteTable(appDatabase);
+                        PreferenceManagerClass.storeString(MainActivity.this, PreferenceManagerClass.TITLE, rowContentInfo.getTitle());
+                        DatabaseUtils.addRowDescription(appDatabase, rowContentInfo.getRows());
+                    }
+                });
             }
 
             @Override
@@ -173,7 +189,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void dataExist(Bundle savedInstanceState) {
         if (savedInstanceState != null && savedInstanceState.containsKey(EXTRA_DATA) && savedInstanceState.containsKey(EXTRA_LAST_POSITION)) {
-
             rowContentInfo = savedInstanceState.getParcelable(EXTRA_DATA);
             lastItemPosition = savedInstanceState.getInt(EXTRA_LAST_POSITION, 0);
             if (rowContentInfo != null) {
@@ -188,17 +203,54 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    @SuppressLint("StaticFieldLeak")
     private void fetchData() {
-        if (isNetworkAvailable()) {
-            getDataFromAPI(false);
-        } else {
-            showHideView(true);
-            msgTextView.setText(getResources().getString(R.string.check_internet));
-        }
+        new AsyncTask<Void, Void, List<RowDescription>>() {
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                progressBar.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            protected List<RowDescription> doInBackground(Void... voids) {
+                return DatabaseUtils.getRowDescription(appDatabase);
+            }
+
+            @Override
+            protected void onPostExecute(List<RowDescription> rowDescriptionList) {
+                super.onPostExecute(rowDescriptionList);
+                progressBar.setVisibility(View.GONE);
+                if (rowDescriptionList != null && rowDescriptionList.size() > 0) {
+                    rowContentInfo = new RowContentInfo();
+                    rowContentInfo.setRows(rowDescriptionList);
+                    String title = PreferenceManagerClass.getString(MainActivity.this, PreferenceManagerClass.TITLE);
+                    rowContentInfo.setTitle(title);
+                    loadData();
+                } else {
+                    if (isNetworkAvailable()) {
+                        getDataFromAPI(false);
+                    } else {
+                        showHideView(true);
+                        msgTextView.setText(getResources().getString(R.string.check_internet));
+                    }
+                }
+
+            }
+        }.execute();
+
+
     }
+
 
     @VisibleForTesting
     public CountingIdlingResource getIdlingResource() {
         return idlingResource;
+    }
+
+    @Override
+    protected void onDestroy() {
+        AppDatabase.destroyInstance();
+        super.onDestroy();
     }
 }
