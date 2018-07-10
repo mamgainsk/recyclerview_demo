@@ -36,11 +36,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHolder
         holder.rowTitle.setText(itemList.get(position).getTitle());
         holder.rowDescription.setText(itemList.get(position).getDescription());
 
-        if (itemList.get(position).getImageHref() != null) {
-            Picasso.get()
-                    .load(itemList.get(position).getImageHref().toString())
-                    .into(holder.rowImage);
-        }
+        Picasso.get()
+                .load(itemList.get(position).getImageHref())
+                .placeholder(R.mipmap.placeholder)
+                .error(R.mipmap.placeholder)
+                .into(holder.rowImage);
+
     }
 
     @Override

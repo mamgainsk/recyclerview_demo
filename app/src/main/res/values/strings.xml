@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">DemoWipro</string>
+
+    <string name="failed_to_retrieve">Failed To Retrieve Data...</string>
+    <string name="no_data">No Data Available...</string>
+    <string name="check_internet">Please Check Internet Connection...</string>
+
 </resources>

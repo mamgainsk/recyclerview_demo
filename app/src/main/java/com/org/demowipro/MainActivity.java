@@ -29,6 +29,9 @@ import static android.content.ContentValues.TAG;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String EXTRA_DATA = "data";
+    private static final String EXTRA_LAST_POSITION = "position";
+
     private RecyclerView recyclerView;
     private List<RowDescription> rowDescriptions;
     private RecyclerViewAdapter recyclerViewAdapter;
@@ -37,6 +40,8 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private ProgressBar progressBar;
     private AppCompatTextView msgTextView;
+    private RowContentInfo rowContentInfo;
+    private int lastItemPosition;
 
     private SwipeRefreshLayout.OnRefreshListener refreshRecyclerViewListener = new SwipeRefreshLayout.OnRefreshListener() {
         @Override
@@ -50,23 +55,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        initializeViews();
+
+        swipeRefreshLayout.setOnRefreshListener(refreshRecyclerViewListener);
+
+        dataExist(savedInstanceState);
+
+
+    }
+
+    private void initializeViews() {
         recyclerView = findViewById(R.id.staggered_list);
         toolbar = findViewById(R.id.toolbar);
         swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
         progressBar = findViewById(R.id.progress_bar);
         msgTextView = findViewById(R.id.msg_textview);
-
-        swipeRefreshLayout.setOnRefreshListener(refreshRecyclerViewListener);
-
-
-        if (isNetworkAvailable()) {
-            getDataFromAPI(false);
-        } else {
-            showHideView(true);
-            msgTextView.setText("Please Check Internet Connection!");
-        }
-
-
     }
 
 
@@ -83,24 +86,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call<?> call, Response<?> response, int requestCode) {
                 Log.d(TAG, "Row Response : " + response.body());
-                RowContentInfo rowContentInfo = (RowContentInfo) response.body();
+                rowContentInfo = (RowContentInfo) response.body();
 
-                if (rowContentInfo != null) {
-                    rowDescriptions = rowContentInfo.getRows();
-                    toolbar.setTitle(rowContentInfo.getTitle());
-                    recyclerViewAdapter = new RecyclerViewAdapter(rowDescriptions);
-                    linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-                    recyclerView.setHasFixedSize(true);
-                    recyclerView.setLayoutManager(linearLayoutManager);
-                    recyclerView.setAdapter(recyclerViewAdapter);
-                    showHideView(false);
-
-                } else {
-                    msgTextView.setText("No Data Available...");
-                    showHideView(true);
-
-
-                }
+                loadData();
                 swipeRefreshLayout.setRefreshing(false);
                 progressBar.setVisibility(View.GONE);
             }
@@ -108,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<?> call, Throwable t, int requestCode) {
                 Log.e(TAG, "Failed : " + t.getLocalizedMessage());
-                msgTextView.setText("Failed To Retrieve Data...");
+                msgTextView.setText(getResources().getString(R.string.failed_to_retrieve));
                 swipeRefreshLayout.setRefreshing(false);
                 progressBar.setVisibility(View.GONE);
                 showHideView(true);
@@ -116,6 +104,26 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }, 1);
+    }
+
+    private void loadData() {
+        if (rowContentInfo != null) {
+            rowDescriptions = rowContentInfo.getRows();
+            toolbar.setTitle(rowContentInfo.getTitle());
+            recyclerViewAdapter = new RecyclerViewAdapter(rowDescriptions);
+            linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+            recyclerView.setHasFixedSize(true);
+            recyclerView.setLayoutManager(linearLayoutManager);
+            recyclerView.setAdapter(recyclerViewAdapter);
+            recyclerView.scrollToPosition(lastItemPosition);
+            showHideView(false);
+
+        } else {
+            msgTextView.setText(getResources().getString(R.string.no_data));
+            showHideView(true);
+
+
+        }
     }
 
     //---------------------- Internet Connection Check ---------------------------
@@ -127,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //------------------------ If List Is Empty ----------------------------------
+    //------------------------ Empty List Check ----------------------------------
     private void showHideView(boolean isListEmpty) {
         if (isListEmpty) {
             recyclerView.setVisibility(View.GONE);
@@ -136,6 +144,52 @@ public class MainActivity extends AppCompatActivity {
         } else {
             recyclerView.setVisibility(View.VISIBLE);
             msgTextView.setVisibility(View.GONE);
+        }
+    }
+
+    //------------------------ Screen Orientation Handled ----------------------------------
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        int lastItemPosition = 0;
+        if (recyclerViewAdapter != null) {
+            LinearLayoutManager layoutManager = ((LinearLayoutManager) recyclerView.getLayoutManager());
+            lastItemPosition = layoutManager.findFirstVisibleItemPosition();
+        }
+        outState.putParcelable(EXTRA_DATA, rowContentInfo);
+        outState.putInt(EXTRA_LAST_POSITION, lastItemPosition);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        dataExist(savedInstanceState);
+    }
+
+    private void dataExist(Bundle savedInstanceState) {
+        if (savedInstanceState != null && savedInstanceState.containsKey(EXTRA_DATA) && savedInstanceState.containsKey(EXTRA_LAST_POSITION)) {
+
+            rowContentInfo = savedInstanceState.getParcelable(EXTRA_DATA);
+            lastItemPosition = savedInstanceState.getInt(EXTRA_LAST_POSITION, 0);
+            if (rowContentInfo != null) {
+                //display data
+                loadData();
+            } else {
+                fetchData();
+            }
+        } else {
+
+            fetchData();
+        }
+    }
+
+    private void fetchData() {
+        if (isNetworkAvailable()) {
+            getDataFromAPI(false);
+        } else {
+            showHideView(true);
+            msgTextView.setText(getResources().getString(R.string.check_internet));
         }
     }
 }
