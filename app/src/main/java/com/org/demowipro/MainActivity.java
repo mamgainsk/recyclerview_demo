@@ -4,6 +4,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.annotation.VisibleForTesting;
+import android.support.test.espresso.idling.CountingIdlingResource;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatTextView;
@@ -43,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
     private RowContentInfo rowContentInfo;
     private int lastItemPosition;
 
+    CountingIdlingResource idlingResource = new CountingIdlingResource("Network Call");
+
     private SwipeRefreshLayout.OnRefreshListener refreshRecyclerViewListener = new SwipeRefreshLayout.OnRefreshListener() {
         @Override
         public void onRefresh() {
@@ -65,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initializeViews() {
-        recyclerView = findViewById(R.id.staggered_list);
+        recyclerView = findViewById(R.id.recycler_view);
         toolbar = findViewById(R.id.toolbar);
         swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
         progressBar = findViewById(R.id.progress_bar);
@@ -78,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
      **/
 
     private void getDataFromAPI(boolean isForceRefresh) {
+        idlingResource.increment();
         showHideView(false);
         if (!isForceRefresh)
             progressBar.setVisibility(View.VISIBLE);
@@ -87,10 +92,10 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<?> call, Response<?> response, int requestCode) {
                 Log.d(TAG, "Row Response : " + response.body());
                 rowContentInfo = (RowContentInfo) response.body();
-
                 loadData();
                 swipeRefreshLayout.setRefreshing(false);
                 progressBar.setVisibility(View.GONE);
+                idlingResource.decrement();
             }
 
             @Override
@@ -100,8 +105,7 @@ public class MainActivity extends AppCompatActivity {
                 swipeRefreshLayout.setRefreshing(false);
                 progressBar.setVisibility(View.GONE);
                 showHideView(true);
-
-
+                idlingResource.decrement();
             }
         }, 1);
     }
@@ -191,5 +195,10 @@ public class MainActivity extends AppCompatActivity {
             showHideView(true);
             msgTextView.setText(getResources().getString(R.string.check_internet));
         }
+    }
+
+    @VisibleForTesting
+    public CountingIdlingResource getIdlingResource() {
+        return idlingResource;
     }
 }
