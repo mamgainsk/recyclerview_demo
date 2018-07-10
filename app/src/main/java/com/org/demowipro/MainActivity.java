@@ -1,26 +1,23 @@
 package com.org.demowipro;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatTextView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 
-import com.org.demowipro.Adapter.RecyclerViewAdapter;
-import com.org.demowipro.NetworkingService.ImageAPIInterface;
-import com.org.demowipro.RequestPOJO.RowContentInfo;
-import com.org.demowipro.RequestPOJO.RowDescription;
+import com.org.demowipro.adapter.RecyclerViewAdapter;
+import com.org.demowipro.networking_service.APICallback;
+import com.org.demowipro.networking_service.NetworkingService;
+import com.org.demowipro.request_pojo.RowContentInfo;
+import com.org.demowipro.request_pojo.RowDescription;
 
 import java.util.List;
 
-import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
-import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 import static android.content.ContentValues.TAG;
 
@@ -30,6 +27,16 @@ public class MainActivity extends AppCompatActivity {
     private List<RowDescription> rowDescriptions;
     private RecyclerViewAdapter recyclerViewAdapter;
     private LinearLayoutManager linearLayoutManager;
+    private AppCompatTextView toolbarTitle;
+    private SwipeRefreshLayout swipeRefreshLayout;
+
+    private SwipeRefreshLayout.OnRefreshListener refreshRecyclerViewListener = new SwipeRefreshLayout.OnRefreshListener() {
+        @Override
+        public void onRefresh() {
+
+            getDataFromAPI();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,10 +44,15 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         recyclerView = findViewById(R.id.staggered_list);
+        toolbarTitle = findViewById(R.id.title_toolbar);
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh_layout);
+
+        swipeRefreshLayout.setOnRefreshListener(refreshRecyclerViewListener);
 
         getDataFromAPI();
 
     }
+
 
     /**
      * Use of retrofit to consume JSON API and send data to Adapter class
@@ -48,44 +60,31 @@ public class MainActivity extends AppCompatActivity {
 
     private void getDataFromAPI() {
 
-        // Use of HttpLoggingInterceptor is redundant: written here  to show logs
-
-        HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-        OkHttpClient client = new OkHttpClient.Builder()
-                .addInterceptor(logging)
-                .build();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BuildConfig.BASE_URL)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        ImageAPIInterface imageAPIInterface = retrofit.create(ImageAPIInterface.class);
-        Call<RowContentInfo> imagesResponseCall = imageAPIInterface.getJSONResponse();
-        imagesResponseCall.enqueue(new Callback<RowContentInfo>() {
+        NetworkingService.fetchResponse(new APICallback() {
             @Override
-            public void onResponse(@NonNull Call<RowContentInfo> call, @NonNull Response<RowContentInfo> response) {
-
+            public void onResponse(Call<?> call, Response<?> response, int requestCode) {
                 Log.d(TAG, "Row Response : " + response.body());
-                RowContentInfo imageURLInfoListBean1 = response.body();
+                RowContentInfo rowContentInfo = (RowContentInfo) response.body();
 
-                if (imageURLInfoListBean1 != null) {
-                    rowDescriptions = imageURLInfoListBean1.getRows();
-                    recyclerViewAdapter = new RecyclerViewAdapter(rowDescriptions, MainActivity.this);
+                if (rowContentInfo != null) {
+                    rowDescriptions = rowContentInfo.getRows();
+                    toolbarTitle.setText(rowContentInfo.getTitle());
+                    recyclerViewAdapter = new RecyclerViewAdapter(rowDescriptions);
                     linearLayoutManager = new LinearLayoutManager(getApplicationContext());
                     recyclerView.setHasFixedSize(true);
                     recyclerView.setLayoutManager(linearLayoutManager);
                     recyclerView.setAdapter(recyclerViewAdapter);
                 }
-
+                swipeRefreshLayout.setRefreshing(false);
             }
 
             @Override
-            public void onFailure(@NonNull Call<RowContentInfo> call, @NonNull Throwable t) {
+            public void onFailure(Call<?> call, Throwable t, int requestCode) {
                 Log.e(TAG, "Failed : " + t.getLocalizedMessage());
+                swipeRefreshLayout.setRefreshing(false);
             }
-        });
+        }, 1);
+        // Use of HttpLoggingInterceptor is redundant: written here  to show logs
+
     }
 }

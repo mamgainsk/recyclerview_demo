@@ -1,4 +1,4 @@
-package com.org.demowipro.RequestPOJO;
+package com.org.demowipro.request_pojo;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

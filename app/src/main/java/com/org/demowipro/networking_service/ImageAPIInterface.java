@@ -1,6 +1,6 @@
-package com.org.demowipro.NetworkingService;
+package com.org.demowipro.networking_service;
 
-import com.org.demowipro.RequestPOJO.RowContentInfo;
+import com.org.demowipro.request_pojo.RowContentInfo;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
