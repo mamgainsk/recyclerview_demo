@@ -10,6 +10,10 @@ public class DatabaseUtils {
         db.rowDescriptionDao().insertAll(rowDescription);
     }
 
+    /**
+     * @param db instance of Database
+     * @return all stored Row Data
+     */
     public static List<RowDescription> getRowDescription(final AppDatabase db) {
         return db.rowDescriptionDao().getAllData();
     }

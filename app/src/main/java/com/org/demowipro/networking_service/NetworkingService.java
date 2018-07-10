@@ -15,6 +15,9 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class NetworkingService {
 
+    /**
+     * @return retrofit instance to get Rest API
+     */
     private static Retrofit init() {
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);

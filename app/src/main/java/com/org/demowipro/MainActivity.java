@@ -126,6 +126,9 @@ public class MainActivity extends AppCompatActivity {
         }, 1);
     }
 
+    /**
+     * Loading data from API
+     */
     private void loadData() {
         if (rowContentInfo != null) {
             rowDescriptions = rowContentInfo.getRows();
@@ -146,7 +149,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //---------------------- Internet Connection Check ---------------------------
+    /**
+     * @return whether internet is available or not
+     */
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -155,7 +160,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //------------------------ Empty List Check ----------------------------------
+    /**
+     * @param isListEmpty to check whether the list is empty or not
+     */
     private void showHideView(boolean isListEmpty) {
         if (isListEmpty) {
             recyclerView.setVisibility(View.GONE);
@@ -167,8 +174,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    //------------------------ Screen Orientation Handled ----------------------------------
 
+    /**
+     * @param outState store data for Screen rotation
+     */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -241,7 +250,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-
 
     @VisibleForTesting
     public CountingIdlingResource getIdlingResource() {
