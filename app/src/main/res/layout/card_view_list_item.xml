@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    card_view:cardCornerRadius="@dimen/corner_dimen"
+    card_view:cardUseCompatPadding="true">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/dp_10">
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/row_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:textColor="@color/colorTitle"
+            tools:text="@string/app_name" />
+
+        <android.support.v7.widget.AppCompatTextView
+            android:id="@+id/row_description"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/row_title"
+            android:layout_marginTop="@dimen/dp_3"
+            android:layout_toStartOf="@+id/row_image"
+            android:textColor="@color/colorDescription"
+            tools:text="@string/app_name" />
+
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/row_image"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/row_title"
+            android:layout_marginTop="@dimen/dp_3"
+            tools:background="@mipmap/ic_launcher" />
+
+
+    </RelativeLayout>
+
+</android.support.v7.widget.CardView>
