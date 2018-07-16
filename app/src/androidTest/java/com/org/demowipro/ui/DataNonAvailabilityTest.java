@@ -1,10 +1,12 @@
-package com.org.demowipro;
+package com.org.demowipro.ui;
 
 import android.support.test.espresso.IdlingRegistry;
+import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 
-import junit.framework.AssertionFailedError;
+import com.org.demowipro.R;
+import com.org.demowipro.ui.InfoListActivity;
 
 import org.junit.After;
 import org.junit.Before;
@@ -17,10 +19,10 @@ import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 
 @LargeTest
-public class DataAvailabilityTest {
+public class DataNonAvailabilityTest {
 
     @Rule
-    public final ActivityTestRule<MainActivity> main = new ActivityTestRule<>(MainActivity.class);
+    public final ActivityTestRule<InfoListActivity> main = new ActivityTestRule<>(InfoListActivity.class);
 
     @Before
     public void registerIdlingResources() {
@@ -29,11 +31,7 @@ public class DataAvailabilityTest {
 
     @Test
     public void testCase() {
-        try {
-            onView(withId(R.id.recycler_view)).check(matches(isDisplayed()));
-        } catch (AssertionFailedError ignored) {
-            onView(withId(R.id.msg_textview)).check(matches(isDisplayed()));
-        }
+        onView(ViewMatchers.withId(R.id.msg_textview)).check(matches(isDisplayed()));
     }
 
     @After

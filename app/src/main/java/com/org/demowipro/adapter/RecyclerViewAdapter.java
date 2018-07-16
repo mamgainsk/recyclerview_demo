@@ -24,7 +24,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHolder
     @NonNull
     @Override
     public RecyclerViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        @SuppressLint("InflateParams") View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_view_list_item, null);
+        View layoutView = LayoutInflater.from(parent.getContext()).inflate(R.layout.card_view_list_item, null);
         RecyclerViewHolder recyclerViewHolders;
         recyclerViewHolders = new RecyclerViewHolder(layoutView);
         return recyclerViewHolders;

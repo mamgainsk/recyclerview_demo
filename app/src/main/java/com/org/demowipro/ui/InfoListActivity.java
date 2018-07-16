@@ -1,4 +1,4 @@
-package com.org.demowipro;
+package com.org.demowipro.ui;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 
+import com.org.demowipro.R;
 import com.org.demowipro.adapter.RecyclerViewAdapter;
 import com.org.demowipro.database_module.AppDatabase;
 import com.org.demowipro.database_module.DatabaseUtils;
@@ -34,7 +35,7 @@ import retrofit2.Response;
 
 import static android.content.ContentValues.TAG;
 
-public class MainActivity extends AppCompatActivity {
+public class InfoListActivity extends AppCompatActivity implements InfoListContract.View{
 
     private static final String EXTRA_DATA = "data";
     private static final String EXTRA_LAST_POSITION = "position";
@@ -51,7 +52,8 @@ public class MainActivity extends AppCompatActivity {
     private int lastItemPosition;
     private AppDatabase appDatabase;
 
-    CountingIdlingResource idlingResource = new CountingIdlingResource("Network Call");
+
+    public CountingIdlingResource idlingResource = new CountingIdlingResource("Network Call");
 
     private SwipeRefreshLayout.OnRefreshListener refreshRecyclerViewListener = new SwipeRefreshLayout.OnRefreshListener() {
         @Override
@@ -108,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         DatabaseUtils.deleteTable(appDatabase);
-                        PreferenceManagerClass.storeString(MainActivity.this, PreferenceManagerClass.TITLE, rowContentInfo.getTitle());
+                        PreferenceManagerClass.storeString(InfoListActivity.this, PreferenceManagerClass.TITLE, rowContentInfo.getTitle());
                         DatabaseUtils.addRowDescription(appDatabase, rowContentInfo.getRows());
                     }
                 });
@@ -233,7 +235,7 @@ public class MainActivity extends AppCompatActivity {
                 if (rowDescriptionList != null && rowDescriptionList.size() > 0) {
                     rowContentInfo = new RowContentInfo();
                     rowContentInfo.setRows(rowDescriptionList);
-                    String title = PreferenceManagerClass.getString(MainActivity.this, PreferenceManagerClass.TITLE);
+                    String title = PreferenceManagerClass.getString(InfoListActivity.this, PreferenceManagerClass.TITLE);
                     rowContentInfo.setTitle(title);
                     loadData();
                 } else {
