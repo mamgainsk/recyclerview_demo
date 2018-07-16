@@ -1,6 +1,5 @@
 package com.org.demowipro.ui;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -161,16 +160,12 @@ public class InfoListActivity extends AppCompatActivity implements InfoListContr
                 fetchData();
             }
         } else {
-
             fetchData();
         }
     }
 
-    @SuppressLint("StaticFieldLeak")
     private void fetchData() {
         presenter.fetchData();
-
-
     }
 
     @VisibleForTesting

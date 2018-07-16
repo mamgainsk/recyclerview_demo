@@ -39,7 +39,7 @@ class InfoListPresenter implements InfoListContract.Presenter {
     public void fetchData() {
 
         view.showProgressBar(true);
-
+        DatabaseUtils.getRowDescription(appDatabase);
 
         new AsyncTask<Void, Void, List<RowDescription>>() {
             @Override
@@ -49,7 +49,7 @@ class InfoListPresenter implements InfoListContract.Presenter {
 
             @Override
             protected List<RowDescription> doInBackground(Void... voids) {
-                return DatabaseUtils.getRowDescription(appDatabase);
+                return
             }
 
             @Override

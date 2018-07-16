@@ -14,8 +14,9 @@ public class DatabaseUtils {
      * @param db instance of Database
      * @return all stored Row Data
      */
-    public static List<RowDescription> getRowDescription(final AppDatabase db) {
-        return db.rowDescriptionDao().getAllData();
+    public static void getRowDescription(final AppDatabase db) {
+        db.rowDescriptionDao().getAllData();
+
     }
 
     public static void deleteTable(final AppDatabase db) {
