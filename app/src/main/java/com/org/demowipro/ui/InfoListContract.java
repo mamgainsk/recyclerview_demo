@@ -20,7 +20,7 @@ public interface InfoListContract {
 
         void reInitListSupportVariable();
 
-        void setToobarTitle(String title);
+        void setToolbarTitle(String title);
 
         void showViews(boolean enabled);
 

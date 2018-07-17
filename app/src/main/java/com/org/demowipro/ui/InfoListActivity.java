@@ -122,7 +122,7 @@ public class InfoListActivity extends AppCompatActivity implements InfoListContr
     }
 
     @Override
-    public void setToobarTitle(String title) {
+    public void setToolbarTitle(String title) {
         toolbar.setTitle(title);
     }
 

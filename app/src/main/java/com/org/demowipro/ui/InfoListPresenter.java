@@ -77,7 +77,7 @@ class InfoListPresenter implements InfoListContract.Presenter {
     public void loadData() {
         if (rowContentInfo != null) {
             rowDescriptions = rowContentInfo.getRows();
-            view.setToobarTitle(rowContentInfo.getTitle());
+            view.setToolbarTitle(rowContentInfo.getTitle());
             view.reInitListSupportVariable();
             view.showViews(false);
         } else {
