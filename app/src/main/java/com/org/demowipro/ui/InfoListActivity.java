@@ -67,7 +67,7 @@ public class InfoListActivity extends AppCompatActivity implements InfoListContr
         presenter.init();
         setContentView(R.layout.activity_main);
         initializeViews();
-
+        getDataFromAPI(true);
         swipeRefreshLayout.setOnRefreshListener(refreshRecyclerViewListener);
 
         dataExist(savedInstanceState);
