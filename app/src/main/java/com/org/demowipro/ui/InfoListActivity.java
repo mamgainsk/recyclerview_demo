@@ -19,9 +19,6 @@ import com.org.demowipro.R;
 import com.org.demowipro.adapter.RecyclerViewAdapter;
 import com.org.demowipro.database_module.AppDatabase;
 import com.org.demowipro.request_pojo.RowContentInfo;
-import com.org.demowipro.request_pojo.RowDescription;
-
-import java.util.List;
 
 public class InfoListActivity extends AppCompatActivity implements InfoListContract.View {
 
@@ -29,15 +26,15 @@ public class InfoListActivity extends AppCompatActivity implements InfoListContr
     private static final String EXTRA_LAST_POSITION = "position";
 
     private RecyclerView recyclerView;
-    private List<RowDescription> rowDescriptions;
+
     private RecyclerViewAdapter recyclerViewAdapter;
     private LinearLayoutManager linearLayoutManager;
     private SwipeRefreshLayout swipeRefreshLayout;
     private Toolbar toolbar;
     private ProgressBar progressBar;
     private AppCompatTextView msgTextView;
-    private RowContentInfo rowContentInfo;
-    private int lastItemPosition;
+//    private RowContentInfo rowContentInfo;
+//    private int lastItemPosition;
 
 
     InfoListContract.Presenter presenter = new InfoListPresenter();
@@ -80,51 +77,64 @@ public class InfoListActivity extends AppCompatActivity implements InfoListContr
 
     private void getDataFromAPI(final boolean isForceRefresh) {
         idlingResource.increment();
-        showHideView(false);
+        showViews(false);
         presenter.getDataFromApi();
         showProgressBar(!isForceRefresh);
     }
 
-    /**
-     * Loading data from API
-     */
-    private void loadData() {
-        if (rowContentInfo != null) {
-            rowDescriptions = rowContentInfo.getRows();
-            toolbar.setTitle(rowContentInfo.getTitle());
-            recyclerViewAdapter = new RecyclerViewAdapter(rowDescriptions);
-            linearLayoutManager = new LinearLayoutManager(getApplicationContext());
-            recyclerView.setHasFixedSize(true);
-            recyclerView.setLayoutManager(linearLayoutManager);
-            recyclerView.setAdapter(recyclerViewAdapter);
-            recyclerView.scrollToPosition(lastItemPosition);
-            showHideView(false);
-
-        } else {
-            msgTextView.setText(getResources().getString(R.string.no_data));
-            showHideView(true);
-
-
-        }
-    }
 
     /**
      * @return whether internet is available or not
      */
-    private boolean isNetworkAvailable() {
+    @Override
+    public boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 
+    @Override
+    public void showNoDataMsg() {
+        showViews(true);
+        msgTextView.setText(getResources().getString(R.string.check_internet));
+    }
+
+    @Override
+    public void reInitListSupportVariable() {
+        recyclerViewAdapter = new RecyclerViewAdapter(presenter.getRowDescriptions());
+        linearLayoutManager = new LinearLayoutManager(getApplicationContext());
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
+        recyclerView.setAdapter(recyclerViewAdapter);
+//        recyclerView.scrollToPosition(lastItemPosition);
+    }
+
+    @Override
+    public void setToobarTitle(String title) {
+        toolbar.setTitle(title);
+    }
+
 
     /**
      * @param isListEmpty to check whether the list is empty or not
      */
-    private void showHideView(boolean isListEmpty) {
+    @Override
+    public void showViews(boolean isListEmpty) {
         recyclerView.setVisibility(isListEmpty ? View.GONE : View.VISIBLE);
         msgTextView.setVisibility(isListEmpty ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    public void showViewMsg(int rString) {
+        msgTextView.setText(getResources().getString(rString));
+    }
+
+    @Override
+    public void enableListRefresh(boolean enabled) {
+        swipeRefreshLayout.setRefreshing(enabled);
+        if (enabled) idlingResource.decrement();
+        else idlingResource.increment();
     }
 
 
@@ -139,7 +149,7 @@ public class InfoListActivity extends AppCompatActivity implements InfoListContr
             LinearLayoutManager layoutManager = ((LinearLayoutManager) recyclerView.getLayoutManager());
             lastItemPosition = layoutManager.findFirstVisibleItemPosition();
         }
-        outState.putParcelable(EXTRA_DATA, rowContentInfo);
+        outState.putParcelable(EXTRA_DATA, presenter.getRowContentInfo());
         outState.putInt(EXTRA_LAST_POSITION, lastItemPosition);
     }
 
@@ -151,11 +161,12 @@ public class InfoListActivity extends AppCompatActivity implements InfoListContr
 
     private void dataExist(Bundle savedInstanceState) {
         if (savedInstanceState != null && savedInstanceState.containsKey(EXTRA_DATA) && savedInstanceState.containsKey(EXTRA_LAST_POSITION)) {
-            rowContentInfo = savedInstanceState.getParcelable(EXTRA_DATA);
-            lastItemPosition = savedInstanceState.getInt(EXTRA_LAST_POSITION, 0);
+            RowContentInfo rowContentInfo = savedInstanceState.getParcelable(EXTRA_DATA);
+            presenter.setRowContentInfo(rowContentInfo);
+//            lastItemPosition = savedInstanceState.getInt(EXTRA_LAST_POSITION, 0);
             if (rowContentInfo != null) {
                 //display data
-                loadData();
+                presenter.loadData();
             } else {
                 fetchData();
             }

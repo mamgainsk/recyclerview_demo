@@ -2,16 +2,19 @@ package com.org.demowipro.ui;
 
 import android.os.AsyncTask;
 import android.util.Log;
-import android.view.View;
 
 import com.org.demowipro.R;
 import com.org.demowipro.database_module.AppDatabase;
 import com.org.demowipro.database_module.DatabaseUtils;
+import com.org.demowipro.events.DBEvents;
 import com.org.demowipro.networking_service.APICallback;
 import com.org.demowipro.networking_service.NetworkingService;
 import com.org.demowipro.preference_manager.PreferenceManagerClass;
 import com.org.demowipro.request_pojo.RowContentInfo;
 import com.org.demowipro.request_pojo.RowDescription;
+
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.List;
 
@@ -24,6 +27,8 @@ class InfoListPresenter implements InfoListContract.Presenter {
 
     private AppDatabase appDatabase;
     private InfoListContract.View view;
+    private List<RowDescription> rowDescriptions;
+    private RowContentInfo rowContentInfo;
 
     @Override
     public void setView(InfoListContract.View view) {
@@ -33,48 +38,51 @@ class InfoListPresenter implements InfoListContract.Presenter {
     @Override
     public void init() {
         appDatabase = AppDatabase.getAppDatabase(view.getContext());
+        rowContentInfo = new RowContentInfo();
     }
 
     @Override
     public void fetchData() {
-
         view.showProgressBar(true);
-        DatabaseUtils.getRowDescription(appDatabase);
+        DatabaseUtils.retrieveRowDescription(appDatabase);
+    }
 
-        new AsyncTask<Void, Void, List<RowDescription>>() {
-            @Override
-            protected void onPreExecute() {
-                super.onPreExecute();
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    public void onDbRetrieved(DBEvents.DbRetrieved event) {
+        view.showProgressBar(false);
+        List<RowDescription> rowDescriptionList = event.getRows();
+        if (rowDescriptionList != null && rowDescriptionList.size() > 0) {
+            RowContentInfo rowContentInfo = new RowContentInfo();
+            rowContentInfo.setRows(rowDescriptionList);
+            String title = PreferenceManagerClass.getString(view.getContext(), PreferenceManagerClass.TITLE);
+            rowContentInfo.setTitle(title);
+            loadData();
+        } else {
+            if (view.isNetworkAvailable()) {
+                getDataFromApi();
+            } else {
+                view.showNoDataMsg();
             }
+        }
+    }
 
-            @Override
-            protected List<RowDescription> doInBackground(Void... voids) {
-                return
-            }
+    ;
 
-            @Override
-            protected void onPostExecute(List<RowDescription> rowDescriptionList) {
-                super.onPostExecute(rowDescriptionList);
+    /**
+     * Loading data from API
+     */
+    @Override
+    public void loadData() {
+        if (rowContentInfo != null) {
+            rowDescriptions = rowContentInfo.getRows();
+            view.setToobarTitle(rowContentInfo.getTitle());
+            view.reInitListSupportVariable();
+            view.showViews(false);
 
-                view.showProgressBar(false);
-
-                if (rowDescriptionList != null && rowDescriptionList.size() > 0) {
-                    rowContentInfo = new RowContentInfo();
-                    rowContentInfo.setRows(rowDescriptionList);
-                    String title = PreferenceManagerClass.getString(InfoListActivity.this, PreferenceManagerClass.TITLE);
-                    rowContentInfo.setTitle(title);
-                    loadData();
-                } else {
-                    if (isNetworkAvailable()) {
-                        getDataFromAPI(false);
-                    } else {
-                        showHideView(true);
-                        msgTextView.setText(getResources().getString(R.string.check_internet));
-                    }
-                }
-
-            }
-        }.execute();
+        } else {
+            view.showViewMsg(R.string.no_data);
+            view.showViews(true);
+        }
     }
 
     @Override
@@ -84,12 +92,9 @@ class InfoListPresenter implements InfoListContract.Presenter {
             public void onResponse(Call<?> call, Response<?> response, int requestCode) {
                 Log.d(TAG, "Row Response : " + response.body());
                 rowContentInfo = (RowContentInfo) response.body();
-                if (isForceRefresh)
-                    lastItemPosition = 0;
                 loadData();
-                swipeRefreshLayout.setRefreshing(false);
-                progressBar.setVisibility(View.GONE);
-                idlingResource.decrement();
+                view.showProgressBar(false);
+                view.enableListRefresh(false);
                 AsyncTask.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -103,12 +108,26 @@ class InfoListPresenter implements InfoListContract.Presenter {
             @Override
             public void onFailure(Call<?> call, Throwable t, int requestCode) {
                 Log.e(TAG, "Failed : " + t.getLocalizedMessage());
-                msgTextView.setText(getResources().getString(R.string.failed_to_retrieve));
-                swipeRefreshLayout.setRefreshing(false);
-                progressBar.setVisibility(View.GONE);
-                showHideView(true);
-                idlingResource.decrement();
+                view.showViewMsg(R.string.failed_to_retrieve);
+                view.showProgressBar(false);
+                view.showViews(true);
+                view.enableListRefresh(false);
             }
         }, 1);
+    }
+
+    @Override
+    public List<RowDescription> getRowDescriptions() {
+        return rowDescriptions;
+    }
+
+    @Override
+    public RowContentInfo getRowContentInfo() {
+        return rowContentInfo;
+    }
+
+    @Override
+    public void setRowContentInfo(RowContentInfo rowContentInfo) {
+        this.rowContentInfo = rowContentInfo;
     }
 }
