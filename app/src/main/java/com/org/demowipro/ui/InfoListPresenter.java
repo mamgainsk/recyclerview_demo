@@ -30,6 +30,7 @@ class InfoListPresenter implements InfoListContract.Presenter {
     private InfoListContract.View view;
     private List<RowDescription> rowDescriptions;
     private RowContentInfo rowContentInfo;
+    private int recentItemPosition = 0;
 
     @Override
     public void setView(InfoListContract.View view) {
@@ -141,5 +142,15 @@ class InfoListPresenter implements InfoListContract.Presenter {
     public void onStop() {
         if (EventBus.getDefault().isRegistered(this))
             EventBus.getDefault().unregister(this);
+    }
+
+    @Override
+    public int getRecentItemPosition() {
+        return recentItemPosition;
+    }
+
+    @Override
+    public void setRecentItemPosition(int lastItemPosition) {
+        recentItemPosition = lastItemPosition;
     }
 }

@@ -49,6 +49,10 @@ public interface InfoListContract {
         void onStart();
 
         void onStop();
+
+        int getRecentItemPosition();
+
+        void setRecentItemPosition(int lastItemPosition);
     }
 
 }

@@ -33,8 +33,6 @@ public class InfoListActivity extends AppCompatActivity implements InfoListContr
     private Toolbar toolbar;
     private ProgressBar progressBar;
     private AppCompatTextView msgTextView;
-//    private RowContentInfo rowContentInfo;
-//    private int lastItemPosition;
 
 
     InfoListContract.Presenter presenter = new InfoListPresenter();
@@ -120,7 +118,7 @@ public class InfoListActivity extends AppCompatActivity implements InfoListContr
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(recyclerViewAdapter);
-//        recyclerView.scrollToPosition(lastItemPosition);
+        recyclerView.scrollToPosition(presenter.getRecentItemPosition());
     }
 
     @Override
@@ -176,7 +174,8 @@ public class InfoListActivity extends AppCompatActivity implements InfoListContr
         if (savedInstanceState != null && savedInstanceState.containsKey(EXTRA_DATA) && savedInstanceState.containsKey(EXTRA_LAST_POSITION)) {
             RowContentInfo rowContentInfo = savedInstanceState.getParcelable(EXTRA_DATA);
             presenter.setRowContentInfo(rowContentInfo);
-//            lastItemPosition = savedInstanceState.getInt(EXTRA_LAST_POSITION, 0);
+            int lastItemPosition = savedInstanceState.getInt(EXTRA_LAST_POSITION, 0);
+            presenter.setRecentItemPosition(lastItemPosition);
             if (rowContentInfo != null) {
                 //display data
                 presenter.loadData();
