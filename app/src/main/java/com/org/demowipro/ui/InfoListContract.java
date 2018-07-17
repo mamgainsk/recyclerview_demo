@@ -45,6 +45,10 @@ public interface InfoListContract {
         RowContentInfo getRowContentInfo();
 
         void setRowContentInfo(RowContentInfo rowContentInfo);
+
+        void onStart();
+
+        void onStop();
     }
 
 }

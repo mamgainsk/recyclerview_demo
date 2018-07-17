@@ -50,9 +50,22 @@ public class InfoListActivity extends AppCompatActivity implements InfoListContr
     };
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        presenter.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        presenter.onStop();
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         presenter.setView(this);
+        presenter.onStart();
         presenter.init();
         setContentView(R.layout.activity_main);
         initializeViews();

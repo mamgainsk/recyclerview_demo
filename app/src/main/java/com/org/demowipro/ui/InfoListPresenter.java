@@ -13,6 +13,7 @@ import com.org.demowipro.preference_manager.PreferenceManagerClass;
 import com.org.demowipro.request_pojo.RowContentInfo;
 import com.org.demowipro.request_pojo.RowDescription;
 
+import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
@@ -78,7 +79,6 @@ class InfoListPresenter implements InfoListContract.Presenter {
             view.setToobarTitle(rowContentInfo.getTitle());
             view.reInitListSupportVariable();
             view.showViews(false);
-
         } else {
             view.showViewMsg(R.string.no_data);
             view.showViews(true);
@@ -129,5 +129,17 @@ class InfoListPresenter implements InfoListContract.Presenter {
     @Override
     public void setRowContentInfo(RowContentInfo rowContentInfo) {
         this.rowContentInfo = rowContentInfo;
+    }
+
+    @Override
+    public void onStart() {
+        if (!EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        if (EventBus.getDefault().isRegistered(this))
+            EventBus.getDefault().unregister(this);
     }
 }
