@@ -1,12 +1,17 @@
 package com.org.demowipro.ui;
 
 import android.content.Context;
+import android.support.test.espresso.idling.CountingIdlingResource;
 
 import com.org.demowipro.request_pojo.RowContentInfo;
 import com.org.demowipro.request_pojo.RowDescription;
 
 import java.util.List;
 
+
+/**
+ * Interface designed to make communication between presenter and View
+ */
 public interface InfoListContract {
 
     interface View {
@@ -27,6 +32,8 @@ public interface InfoListContract {
         void showViewMsg(int rString);
 
         void enableListRefresh(boolean enabled);
+
+        CountingIdlingResource getIdlingResource();
     }
 
     interface Presenter {

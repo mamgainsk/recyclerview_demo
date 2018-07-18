@@ -1,6 +1,7 @@
 package com.org.demowipro.ui;
 
 import com.org.demowipro.R;
+import com.org.demowipro.request_pojo.RowContentInfo;
 
 import org.junit.After;
 import org.junit.Before;
@@ -14,33 +15,19 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class InfoListPresenterTest {
 
     @Mock
-    InfoListContract.View view;
+    private InfoListContract.View view;
     private InfoListPresenter presenter;
+    private RowContentInfo rowContentInfo;
 
     @Before
     public void setUp() throws Exception {
         presenter = new InfoListPresenter();
         presenter.setView(view);
+        rowContentInfo = new RowContentInfo();
     }
 
     @After
     public void tearDown() throws Exception {
-    }
-
-    @Test
-    public void test_setView() {
-    }
-
-    @Test
-    public void test_init() {
-    }
-
-    @Test
-    public void test_fetchData() {
-    }
-
-    @Test
-    public void test_onDbRetrieved() {
     }
 
     @Test
@@ -54,34 +41,13 @@ public class InfoListPresenterTest {
     }
 
     @Test
-    public void test_getDataFromApi() {
-    }
+    public void test_loadData_whenContentIsNotNull() {
+        presenter.setRowContentInfo(rowContentInfo);
 
-    @Test
-    public void test_getRowDescriptions() {
-    }
+        presenter.loadData();
 
-    @Test
-    public void test_getRowContentInfo() {
-    }
-
-    @Test
-    public void test_setRowContentInfo() {
-    }
-
-    @Test
-    public void test_onStart() {
-    }
-
-    @Test
-    public void test_onStop() {
-    }
-
-    @Test
-    public void test_getRecentItemPosition() {
-    }
-
-    @Test
-    public void test_setRecentItemPosition() {
+        Mockito.verify(view, Mockito.times(1)).setToolbarTitle(rowContentInfo.getTitle());
+        Mockito.verify(view, Mockito.times(1)).reInitListSupportVariable();
+        Mockito.verify(view, Mockito.times(1)).showViews(false);
     }
 }

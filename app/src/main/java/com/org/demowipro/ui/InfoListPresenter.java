@@ -1,6 +1,5 @@
 package com.org.demowipro.ui;
 
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.org.demowipro.R;
@@ -68,11 +67,7 @@ class InfoListPresenter implements InfoListContract.Presenter {
         }
     }
 
-    ;
 
-    /**
-     * Loading data from API
-     */
     @Override
     public void loadData() {
         if (rowContentInfo != null) {
@@ -86,8 +81,13 @@ class InfoListPresenter implements InfoListContract.Presenter {
         }
     }
 
+    /**
+     * API call using retrofit
+     */
     @Override
     public void getDataFromApi() {
+        view.getIdlingResource().increment();
+        view.showProgressBar(true);
         NetworkingService.fetchResponse(new APICallback() {
             @Override
             public void onResponse(Call<?> call, Response<?> response, int requestCode) {
@@ -96,14 +96,9 @@ class InfoListPresenter implements InfoListContract.Presenter {
                 loadData();
                 view.showProgressBar(false);
                 view.enableListRefresh(false);
-                AsyncTask.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        DatabaseUtils.deleteTable(appDatabase);
-                        PreferenceManagerClass.storeString(view.getContext(), PreferenceManagerClass.TITLE, rowContentInfo.getTitle());
-                        DatabaseUtils.addRowDescription(appDatabase, rowContentInfo.getRows());
-                    }
-                });
+                DatabaseUtils.deleteTable(appDatabase);
+                PreferenceManagerClass.storeString(view.getContext(), PreferenceManagerClass.TITLE, rowContentInfo.getTitle());
+                DatabaseUtils.addRowDescription(appDatabase, rowContentInfo.getRows());
             }
 
             @Override

@@ -83,11 +83,10 @@ public class InfoListActivity extends AppCompatActivity implements InfoListContr
 
 
     /**
-     * Use of retrofit to consume JSON API and send data to Adapter class
+     * Use of retrofit to consume JSON API and send data to Adapter class Method written in Presenter Class
      **/
 
     private void getDataFromAPI(final boolean isForceRefresh) {
-        idlingResource.increment();
         showViews(false);
         presenter.getDataFromApi();
         showProgressBar(!isForceRefresh);
@@ -144,8 +143,8 @@ public class InfoListActivity extends AppCompatActivity implements InfoListContr
     @Override
     public void enableListRefresh(boolean enabled) {
         swipeRefreshLayout.setRefreshing(enabled);
-        if (enabled) idlingResource.decrement();
-        else idlingResource.increment();
+        if (enabled) idlingResource.increment();
+        else idlingResource.decrement();
     }
 
 
@@ -192,6 +191,7 @@ public class InfoListActivity extends AppCompatActivity implements InfoListContr
     }
 
     @VisibleForTesting
+    @Override
     public CountingIdlingResource getIdlingResource() {
         return idlingResource;
     }
