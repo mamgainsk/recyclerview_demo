@@ -31,7 +31,7 @@ public class DataAvailabilityTest {
     }
 
     @Test
-    public void testCase() {
+    public void shouldShowListIfDataAvailable() {
         try {
             onView(ViewMatchers.withId(R.id.recycler_view)).check(matches(isDisplayed()));
         } catch (AssertionFailedError ignored) {

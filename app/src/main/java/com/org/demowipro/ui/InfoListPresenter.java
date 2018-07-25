@@ -8,7 +8,7 @@ import com.org.demowipro.database_module.DatabaseUtils;
 import com.org.demowipro.events.DBEvents;
 import com.org.demowipro.networking_service.APICallback;
 import com.org.demowipro.networking_service.NetworkingService;
-import com.org.demowipro.preference_manager.PreferenceManagerClass;
+import com.org.demowipro.preference_manager.TitleSessionManager;
 import com.org.demowipro.request_pojo.RowContentInfo;
 import com.org.demowipro.request_pojo.RowDescription;
 
@@ -55,7 +55,7 @@ class InfoListPresenter implements InfoListContract.Presenter {
         if (rowDescriptionList != null && rowDescriptionList.size() > 0) {
             RowContentInfo rowContentInfo = new RowContentInfo();
             rowContentInfo.setRows(rowDescriptionList);
-            String title = PreferenceManagerClass.getString(view.getContext(), PreferenceManagerClass.TITLE);
+            String title = TitleSessionManager.getString(view.getContext(), TitleSessionManager.TITLE);
             rowContentInfo.setTitle(title);
             loadData();
         } else {
@@ -97,7 +97,7 @@ class InfoListPresenter implements InfoListContract.Presenter {
                 view.showProgressBar(false);
                 view.enableListRefresh(false);
                 DatabaseUtils.deleteTable(appDatabase);
-                PreferenceManagerClass.storeString(view.getContext(), PreferenceManagerClass.TITLE, rowContentInfo.getTitle());
+                TitleSessionManager.storeString(view.getContext(), TitleSessionManager.TITLE, rowContentInfo.getTitle());
                 DatabaseUtils.addRowDescription(appDatabase, rowContentInfo.getRows());
             }
 

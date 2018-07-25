@@ -3,7 +3,7 @@ package com.org.demowipro.preference_manager;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-public class PreferenceManagerClass {
+public class TitleSessionManager {
 
     public static final String TITLE = "title";
 
