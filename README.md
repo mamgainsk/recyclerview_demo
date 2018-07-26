@@ -1,16 +1,31 @@
-Android + Retrofit 2 + EventBus - example
-================================================
-Here is an example of usage [Retrofit 2](http://square.github.io/retrofit/) and [EventBus](http://greenrobot.org/eventbus/). Moreover project based on nice binding library [Butter Knife](http://jakewharton.github.io/butterknife/). The REST API service is provided by [https://darksky.net](https://darksky.net).
+Android : RecyclerView Demo
+============================
+This application is an example of usage [Retrofit 2](http://square.github.io/retrofit/),[EventBus](http://greenrobot.org/eventbus/) and 
+[Room Persistence Library](https://developer.android.com/topic/libraries/architecture/room)
+
 
 Goals
 --------
-The example application has the following goals:
+- Display JSON data in a RecyclerView 
+- Support for REST API using Retrofit(Type-safe HTTP client for Android) library
+- Support for database event using Event Bus library
+- Room Persistence Library for fluent database access
+- Support for Screen orientation changes and all the negative scenarios  
 
-- Support for API REST Web Service using Retrofit 2 library
-- Support for event notification using Event Bus library
-- Bind Retrofit 2 with Event Bus, for performing HTTP request and handle event with result.
+
+Testing 
+--------
+- Android User Interface testing using [Espresso](https://developer.android.com/training/testing/espresso/)
+- Unit Testing by creating and configuring mock objects using [Mockito Framework](https://github.com/mockito/mockito)
+
+
+Material Design Usage and other Libraries
+------------------------------------------
+- Use of RecyclerView, CardView and Toolbar
+- [Picasso](http://square.github.io/picasso/) for hassle-free image loading in application
+- [OkHttp-logging-interceptor](https://github.com/square/okhttp/tree/master/okhttp-logging-interceptor) An OkHttp interceptor which logs HTTP request and response data
+
 
 Screen
 ---------
-
-<img style="display: block; margin-left: auto; margin-right: auto;" src="screen_android.png">
+<img style="display: block; margin-left: auto; margin-right: auto;" src="recyclerview_screen.png">
